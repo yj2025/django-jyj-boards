@@ -1,6 +1,4 @@
 {
-  "python.pythonPath": "venv\\Scripts\\python.exe",
-  "python.autoImportCompletions": true,
   "[python]": {
     "diffEditor.ignoreTrimWhitespace": false,
     "editor.defaultColorDecorators": "auto",
