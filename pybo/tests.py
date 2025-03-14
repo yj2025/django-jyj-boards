@@ -1,10 +1,12 @@
 from django.test import TestCase
 from django.db.models import Count, Sum, Avg, Min, Max
 from django.db.models.functions import Length  # Length를 여기에서 임포트
-from django.db import connection
 
 from django.utils import timezone
+from regex import F
 from pybo.models import Answer, Question
+from django.db.models import F
+
 
 class AggregateTestCase(TestCase):
 
@@ -56,9 +58,64 @@ class AggregateTestCase(TestCase):
             create_date=timezone.now(),
         )
 
+    def test_sum_answer_ids(self):
+        """
+        Test for Sum aggregation on answer ids
+        """
+        result = Answer.objects.aggregate(Sum("id"))
+        # SQL 쿼리:
+        # SELECT SUM(id) FROM Answer;
+        print(result)
+        self.assertEqual(result["id__sum"], 16) #AssertionError: 15 != 16
+
+    def test_annotate(self):
+        # 🎯 annotate() 정리
+        # ✔ annotate()는 개별 객체(레코드)에 대해 추가 필드를 생성하여 값을 포함한 QuerySet 반환
+        # ✔ GROUP BY를 자동으로 처리하여 집계 함수(Aggregate Functions) 적용 가능
+        # ✔ Count, Sum, Avg, Min, Max, Length 등 다양한 집계 연산을 활용 가능
+        # ✔ Case-When을 사용하여 조건부 필드 추가 가능
+        # 🔹 즉, annotate()는 개별 항목에 대해 추가 정보를 붙이는 강력한 기능! 🚀
+
+        # 부서별 사람수  select count(*), deptno from emp group by deptno
+        # 부서별 월급 총합
+        # select max(sal) as sal, deptno, ename from emp group by deptno
+        # 3000 10
+        # 2000 20
+        # 500  50
+
+        # 각 질문별 최신 답변의 날짜 가져오기
+        # SQL 로 표현하면
+
+        # SELECT q.id,  MAX(a.create_date) AS latest_answer_date
+        # FROM question q
+        # LEFT JOIN answer a
+        #     ON q.id = a.question_id
+        # GROUP BY q.id
+
+        # group by 절을 기본적으로 만듦
+        questions = Question.objects.annotate(
+            latest_answer_date=Max("answer__create_date")
+        )
+
+        # for q in questions:
+        #    print(q.subject, q.latest_answer_date)
+
+        # 각 문제별, 대답들 갯수
+
+        # SELECT q.id, COUNT(a.id) AS answer_count
+        # FROM Question q
+        # LEFT JOIN Answer a ON q.id = a.question_id
+        # GROUP BY q.id,
+
+        questions = Question.objects.annotate(answer_count=Count("answer__id"))
+
+        # for q in questions:
+        #    print(f"질문: {q.subject}, 답변 개수: {q.answer_count}")
+
     # def test_value(self):
     #     ## SQL 쿼리:
     #     ## SELECT subject, content  FROM Answer;
+    #     # SELECT *  FROM Answer; => queryset
     #     ## 딕셔너리 형태로 반환
     #     result = Question.objects.values("subject", "content")
     #     result = Question.objects.all().values()  # 딕셔너리
@@ -116,7 +173,7 @@ class AggregateTestCase(TestCase):
         # print(query)
 
         # 제목이 'Django란?'이고, 내용에 'MTV'가 포함된 질문
-        # SELECT * FROM Question WHERE subject = 'Django란?' AND content LIKE '%MTV%';
+        # SELECT * FROM Question WHERE subject = 'Django란?' AND content LIKE '%Django%';
         query = Question.objects.filter(
             subject="Django란?", content__icontains="Django"
         )  # dev_2
@@ -125,9 +182,9 @@ class AggregateTestCase(TestCase):
         # 제목이 'Django란?'이거나 'Python이란?'인 질문 (OR 조건)
         from django.db.models import Q
 
-        # SELECT * FROM Question WHERE subject = 'Django란?' OR subject = 'Python이란?';
+        # SELECT * FROM Question WHERE subject = 'Django란?' and subject = 'Python이란?';
         query = Question.objects.filter(
-            Q(subject="Django란?") | Q(subject="Python이란?")
+            Q(subject="Django란?") & Q(subject="Python이란?") | Q(subject="홍길동")
         )  # dev_2
         # print(query)
 
@@ -143,132 +200,64 @@ class AggregateTestCase(TestCase):
         # if Question.objects.filter(subject="Django란?").exists():
         #    print("해당 질문이 존재합니다.")
 
-    # annotate @, aggregate
-    def test_annotate(self):
+        # annotate , aggregate
+        # aggregate = 전체 통계 함수
 
-        questions = Question.objects.annotate(
-            latest_answer_date=Max("answers__create_date")
+    def test_aggregate(self):
+
+        # 1. 전체 대답 갯수
+        # select count(id) as total_answers from answer
+        answer = Answer.objects.aggregate(total_answers=Count("id"))
+        # print(answer) #{'total_answers': 5}
+
+        # 2. 전체 질문 개수 구하기
+        question = Question.objects.aggregate(total_questions=Count("id"))
+        # print(question) #{'total_questions': 5}
+
+        # 3. 전체 답변의 평균 길이 구하기
+        # SELECT AVG(LENGTH(content)) AS avg_content_length FROM Answer;
+        result = Answer.objects.aggregate(avg_content_length=Avg(Length("content")))
+        # print(result)
+
+        # 4.가장 오래된 질문 날짜 구하기(MIN)
+        question = Question.objects.aggregate(oldest_questions=Min("create_date"))
+        print(question)  # {'total_questions': 5}
+
+        # 5. 전체 답변 글자 수 합계 구하기
+        # 6. 가장 긴 질문 길이 구하기
+
+    def test_raw(self):
+        # raw 함수 다이렉트로 sql 구문을 적을수 있도록 만든함수
+        questions = Question.objects.raw("SELECT * FROM pybo_question")
+        for question in questions:
+            print(question.id, question.subject)
+
+        # 2. 특정 질문 가져오기 (id=1)
+        # SELECT * FROM pybo_question WHERE id = 1;
+        questions = Question.objects.raw(
+            "SELECT * FROM pybo_question where id = %s", [1]
         )
         for q in questions:
-            print(q.subject, q.latest_answer_date)
-        # 🎯 annotate() 정리
-        # ✔ annotate()는 개별 객체(레코드)에 대해 추가 필드를 생성하여 값을 포함한 QuerySet 반환
-        # ✔ GROUP BY를 자동으로 처리하여 집계 함수(Aggregate Functions) 적용 가능
-        # ✔ Count, Sum, Avg, Min, Max, Length 등 다양한 집계 연산을 활용 가능
-        # ✔ Case-When을 사용하여 조건부 필드 추가 가능
-        # 🔹 즉, annotate()는 개별 항목에 대해 추가 정보를 붙이는 강력한 기능! 🚀
+            print(q.subject, q.content)
 
+        # 3. 특정 키워드가 포함된 질문 검색
+        keyword = "%Django%"
+        questions = Question.objects.raw(
+            "SELECT * FROM pybo_question WHERE content LIKE %s", [keyword]
+        )
+        for q in questions:
+            print(q.subject)
 
-
-    # 각 질문별 content의 길이 구하기
-    # SELECT id, subject, LENGTH(content) AS content_length FROM pybo_question;
-    # questions = Question.objects.annotate(content_length=Length("content"))
-    # for q in questions:
-    #    print(q.subject, q.content_length)
-
-    # 4️⃣ 각 질문별 최신 답변의 날짜 가져오기from django.db.models import Max
-
-    questions = Question.objects.annotate(
-        latest_answer_date=Max("answers__create_date")
-    )
-    # for q in questions:
-    #    print(q.subject, q.latest_answer_date)
-
-    # 4️⃣ 각 문제별, 대답들 갯수
-    questions = Question.objects.annotate(answer_count=Count("answers"))
-    # SELECT q.id, q.subject, COUNT(a.id) AS answer_count
-    # FROM Question q
-    # LEFT JOIN Answer a ON q.id = a.question_id
-    # GROUP BY q.id, q.subject;
-
-    # for q in questions:
-    #    print(f"질문: {q.subject}, 답변 개수: {q.answer_count}")
-
-def test_aggregate(self):
-    # SELECT COUNT(id) AS total_answers FROM Answer;
-    answer = Answer.objects.aggregate(total_answers=Count("id"))  # 전체 갯수 또는 *
-    print(answer)  # {'total_answers': 5}
-
-    # 2. 전체 질문 개수 구하기
-    result = Question.objects.aggregate(total_questions=Count("id"))
-    print(result)
-
-    question = Question.objects.aggregate(total_questions=Count("id"))
-    print(question)
-
-    # 3. 전체 답변의 평균 길이 구하기
-    # SELECT AVG(LENGTH(content)) AS avg_content_length FROM Answer;
-    result = Answer.objects.aggregate(avg_content_length=Avg(Length("content")))
-    # print(result)
-
-    # 4. 가장 오래된 질문 날짜 구하기
-    # SELECT MIN(create_date) AS oldest_question FROM Question;
-    result = Question.objects.aggregate(oldest_question=Min("create_date"))
-    # print(result)
-
-    # 5. 전체 답변 글자 수 합계 구하기
-    result = Answer.objects.aggregate(total_content_length=Sum(Length("content")))
-    # print(result)
-
-    # 6. 가장 긴 질문 길이 구하기
-    result = Question.objects.aggregate(longest_question=Max(Length("content")))
-    # print(result)
-
-def test_raw(self):
-
-    questions = Question.objects.raw("SELECT * FROM pybo_question")
-    for question in questions:
-        print(question.id, question.subject)
-
-    # 2. 특정 질문 가져오기 (id=1)
-    # SELECT * FROM pybo_question WHERE id = 1;
-    question = Question.objects.raw(
-        "SELECT * FROM pybo_question WHERE id = %s", [1]
-    )
-    for q in question:
-        print(q.subject, q.content)
-    # 3. 특정 키워드가 포함된 질문 검색
-    keyword = "%Django%"
-    questions = Question.objects.raw(
-        "SELECT * FROM pybo_question WHERE content LIKE %s", [keyword]
-    )
-    for q in questions:
-        print(q.subject)
-
-    # 4. 답변이 가장 많은 질문 가져오기
-    questions = Question.objects.raw(
-        """
-        SELECT q.id, q.subject, COUNT(a.id) AS answer_count
-        FROM pybo_question q
-        LEFT JOIN pybo_answer a ON q.id = a.question_id
-        GROUP BY q.id
-        ORDER BY answer_count DESC
-        LIMIT 1
-    """
-    )
-    for q in questions:
-        print(q.subject, q.answer_count)
-
-    # 5. 질문 ID와 해당하는 답변 개수 가져오기
-
-    questions = Question.objects.raw(
-        """
-        SELECT q.id, q.subject, COUNT(a.id) AS num_answers
-        FROM pybo_question q
-        LEFT JOIN pybo_answer a ON q.id = a.question_id
-        GROUP BY q.id
-    """
-    )
-    for q in questions:
-        print(q.subject, q.num_answers)
-
-
-    def test_sum_answer_ids(self):
-        """
-        Test for Sum aggregation on answer ids
-        """
-        result = Answer.objects.aggregate(Sum("id"))
-        # SQL 쿼리:
-        # SELECT SUM(id) FROM Answer;
-        print(result)
-        self.assertEqual(result["id__sum"], 15)
+        # 4. 답변이 가장 많은 질문 가져오기
+        questions = Question.objects.raw(
+            """
+            SELECT q.id, q.subject, COUNT(a.id) AS answer_count
+            FROM pybo_question q
+            LEFT JOIN pybo_answer a ON q.id = a.question_id
+            GROUP BY q.id
+            ORDER BY answer_count DESC
+            LIMIT 1
+            """
+        )
+        for q in questions:
+            print(q.subject, q.answer_count)
