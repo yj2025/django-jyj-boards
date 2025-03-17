@@ -1,14 +1,24 @@
+{% comment %} static 모듈을 메모리에 올리는것 {% endcomment %}
+{% load static %}
+{% comment %} 
+STATIC_URL = "static/"
+
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+] 
+{% endcomment %}
+<link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+<img src="{% static '11.png' %}">
 <h1>{{ question.subject }}</h1>
 <div>{{ question.content }}</div>
-{% comment %} 역방향 {% endcomment %}
 <h5>{{ question.answer_set.count }}개의 답변이 있습니다.</h5>
 <div>
     <ul>
-        {% for answer in question.answer_set.all %}<li>{{ answer.content }}</li>{% endfor %}
+        {% for answer in  question.answer_set.all %}<li>{{ answer.content }}</li>{% endfor %}
     </ul>
 </div>
 <form action="{% url 'pybo:answer_create' question.id %}" method="post">
     {% csrf_token %}
-    <textarea name="content" id="content" rows="15"></textarea>
+    <textarea name="content"  rows="15"></textarea>
     <input type="submit" value="답변등록">
 </form>
