@@ -227,7 +227,7 @@ class AggregateTestCase(TestCase):
         # 6. 가장 긴 질문 길이 구하기
 
     def test_raw(self):
-        # raw 함수 다이렉트로 sql 구문을 적을수 있도록 만든함수
+        # raw 함수 다이렉트로 SQL 구문을 적을 수 있도록 만든함수
         questions = Question.objects.raw("SELECT * FROM pybo_question")
         for question in questions:
             print(question.id, question.subject)
