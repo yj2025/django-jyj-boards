@@ -2,7 +2,9 @@
     <ul>
         {% for question in question_list %}
             <li>
-                <a href="/pybo/{{ question.id }}/">{{ question.subject }}</a>
+                {% comment %} namespace (네임 스페이스) {% endcomment %}
+                {% comment %} http://127.0.0.1:8000/pybo/3/ {% endcomment %}
+                <a href="{% url 'pybo:detail' question.id %}">{{ question.subject }}</a>
             </li>
         {% endfor %}
     </ul>
