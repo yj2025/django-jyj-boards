@@ -1,7 +1,7 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseNotAllowed
 from django.shortcuts import get_object_or_404, redirect, render
 
-from pybo.forms import QuestionForm
+from pybo.forms import AnswerForm, QuestionForm
 from pybo.models import Answer, Question
 from django.utils import timezone
 
@@ -26,27 +26,28 @@ def detail(request, question_id):
     # path(
     #     "answer/create/<int:question_id>/", views.answer_create, name="answer_create"
     # ),  # dev_5
-
-
-# dev_5
+# dev_9
 def answer_create(request, question_id):
-    # answer/create/6/
+    """
+    pybo 답변등록
+    """
     question = get_object_or_404(Question, pk=question_id)
-
-    content = request.POST.get("content")
-
-    # select * from qusertion , answer where answer.qusetin_id = 6
-    # question.answer_set.create(content=content, create_date=timezone.now())
-
-    answer = Answer(question=question, content=content, create_date=timezone.now())
-    answer.save()
-
-    return redirect("pybo:detail", question_id=question_id)
-
-
-# path("question/create/", views.question_create, name="question_create"),  # dev_9
-
-# <textarea name="content" cols="40" rows="10" required="" id="id_content"></textarea>
+    
+    if request.method == "POST":
+        form = AnswerForm(request.POST)
+        
+        if form.is_valid():
+            answer = form.save(commit=False)
+            answer.create_date = timezone.now()
+            answer.question = question
+            answer.save()
+            return redirect("pybo:detail", question_id=question.id)
+        
+    else:
+        return HttpResponseNotAllowed("Only POST is possible.")
+    
+    context = {"question": question, "form": form}
+    return render(request, "pybo/question_detail.html", context)
 
 
 def question_create(request):
@@ -62,7 +63,7 @@ def question_create(request):
             question.create_date = timezone.now()
             question.save()
             return redirect("pybo:index")
-        
+
     else:
         form = QuestionForm()
 
