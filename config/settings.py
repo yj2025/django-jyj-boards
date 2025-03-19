@@ -151,3 +151,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 #         },
 #     },
 # }
+
+# http://127.0.0.1:8000/accounts/profile/ => 로그인 성공 시 디폴트 URL
+# 로그인 성공 후 이동하는 URL
+LOGIN_REDIRECT_URL = '/'
