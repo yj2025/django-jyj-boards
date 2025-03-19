@@ -16,9 +16,8 @@
                             <td>{{ forloop.counter }}</td>
                             <td>
                                 <a href="{% url 'pybo:detail' question.id %}">{{ question.subject }}</a>
-                                {% if question.answer_set.count > 0 %}
-                                    <span class="text-danger small mx-2">{{ question.answer_set.count }}</span>
-                                {% endif %}
+                                <!--dev_12-->
+                                <span class="text-danger samll mx-2">{{ question.answer_set.count }}</span>
                             </td>
                             <td>{{ question.create_date }}</td>
                         </tr>
