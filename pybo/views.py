@@ -1,3 +1,4 @@
+from urllib import response
 from django.http import HttpResponse, HttpResponseNotAllowed
 from django.shortcuts import get_object_or_404, redirect, render
 
@@ -79,3 +80,50 @@ def question_create(request):
 
     context = {"form": form}
     return render(request, "pybo/question_form.html", context)
+
+def set_cookie_view(request):
+    """쿠키 설정"""
+    response = HttpResponse("쿠키가 설정되었습니다.")
+    response.set_cookie("my_cookie","cookie_value",max_age=3600) # 1시간 유지
+    return response
+
+def get_cookie_view(request):
+    """쿠키 가져오기"""
+    cookie_value = request.COOKIES.get("my_cookie","쿠키가 없습니다.")
+    return HttpResponse("쿠키값:{cookie_value}")
+
+def delete_cookie_view(request):
+    """쿠키 삭제"""
+    response = HttpResponse("쿠키가 삭제 되었습니다.")
+    response.delete_cookie("my_cookie")
+    return response
+
+def set_session_view(request):
+    """세션 설정"""
+    request.session["username"] = "DjangoUser"  # 세션값 저장.
+    request.session.set_expiry(3600)  # 1시간 후 만료
+    return HttpResponse("세션이 설정되었습니다.")
+
+
+def get_session_view(request):
+
+    from django.contrib.sessions.models import Session
+    from django.contrib.sessions.backends.db import SessionStore
+
+    # 특정 세션 키 조회
+    session_key = "jzr0q2n8h2cuvr8o485z23i5ny7h2g8m"  # 실제 저장된 session_key 입력
+    session = Session.objects.get(session_key=session_key)
+
+    # 세션 데이터 복호화
+    session_data = SessionStore(session_key=session_key).load()
+    print(session_data)  # {'username': 'DjangoUser'}
+    
+    """세션 가져오기"""
+    username = request.session.get("username", "세션이 없습니다")
+    return HttpResponse(f"세션값:{username}")
+
+
+def delete_session_view(request):
+    """세션 삭제"""
+    request.session.flush()  # 모든 세션 데이타 삭제
+    return HttpResponse("세션이 삭제 되었습니다.")
