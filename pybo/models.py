@@ -1,14 +1,14 @@
 from django.db import models
 
 # Create your models here.
+
+
 # dev_2
-
-
-# 하나의 질문에는 무수히 많은 답변이 등록
+# 하나의 질문에 다수의 답변 등록가능
 class Question(models.Model):
-    subject = models.CharField(max_length=100)
-    content = models.TextField()  # 글자 수에 제한이 없는 텍스트는 TextField를 사용한다
-    create_date = models.DateTimeField()
+    subject = models.CharField(max_length=100)  # 제목
+    content = models.TextField()  # 글자 수 제한이 없는 텍스트 = TextField
+    create_date = models.DateTimeField()  # 작성일시
 
     def __str__(self):
         return self.subject
