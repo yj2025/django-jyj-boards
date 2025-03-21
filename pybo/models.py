@@ -26,5 +26,5 @@ class Answer(models.Model):
 # q.answer_set.all()
 # <QuerySet [<Answer: Answer object (3)>, <Answer: Answer object (4)>, <Answer: Answer object (8)>]>
 
-# .answer_set.all()    # 4.answer_set.all() # 역방향 참조
+# .answer_set.all()          # 4.answer_set.all() # 역방향 참조
 # Question .answers.all()    # 4.answers.all() # 역방향 참조
