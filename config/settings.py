@@ -33,12 +33,12 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
-    "django.contrib.contenttypes",
+    "django.contrib.contenttypes",  
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "pybo",  # dev_2
-    "common", # dev_13
+    "common",  # dev_13
 ]
 
 MIDDLEWARE = [
@@ -53,9 +53,9 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "config.urls"
 
-#모든 앱이 공통으로 사용할 템플릿 디렉터리 - /templates
-#pybo 앱이 사용할 템플릿 디렉터리 - /templates/pybo
-#common 앱이 사용할 템플릿 디렉터리 - /templates/common
+# 모든 앱이 공통으로 사용할 템플릿 디렉터리 - /templates
+# pybo 앱이 사용할 템플릿 디렉터리 - /templates/pybo
+# common 앱이 사용할 템플릿 디렉터리 - /templates/common
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -120,15 +120,16 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-# static 디렉터리
-# URL 상의 스테틱 폴더를, 로컬(내컴퓨터)의 파일 폴더와 매칭 시키는 부분
+# 스태틱(static) 디렉터리
+# URL 상의 스택틱 폴더를 ,로컬(내컴퓨터)의 파일 폴더와 매칭 시키는 부분
 
-# http:127.0.0.1:8000/static/
+# http://127.0.0.1:8000/static/
 STATIC_URL = "static/"
-# C:\3.django_ms\django-jyj-boards\static
+# D:\멋사\장고-프로젝트\django-hjs-boards\static
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -152,6 +153,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 #     },
 # }
 
-# http://127.0.0.1:8000/accounts/profile/ => 로그인 성공 시 디폴트 URL
-# 로그인 성공 후 이동하는 URL
+# http://127.0.0.1:8000/accounts/profile/ => 로그인 성공시 디폴트 URL
+# 로그인 성공후 이동하는 URL
+# dev_13
 LOGIN_REDIRECT_URL = '/'
