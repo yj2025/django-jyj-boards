@@ -10,13 +10,16 @@ from django.core.paginator import Paginator
 # Create your views here.
 
 
-# http://127.0.0.1:8000/pybo/
+# http://127.0.0.1:8000/pybo
 def index(request):
 
+    print(request.user)
+
+    # ?page=4
     page = request.GET.get("page", "1")  # 페이지
 
     question_list = Question.objects.order_by("-create_date")
-    
+
     paginator = Paginator(question_list, 10)  # 페이지당 10개씩 보여주기
     page_obj = paginator.get_page(page)
     context = {"question_list": page_obj}
@@ -81,22 +84,26 @@ def question_create(request):
     context = {"form": form}
     return render(request, "pybo/question_form.html", context)
 
+
 def set_cookie_view(request):
     """쿠키 설정"""
-    response = HttpResponse("쿠키가 설정되었습니다.")
-    response.set_cookie("my_cookie","cookie_value",max_age=3600) # 1시간 유지
+    response = HttpResponse("쿠키가 설정되었습니다")
+    response.set_cookie("my_cookie", "cookie_value", max_age=3600)  # 1시간 유지
     return response
+
 
 def get_cookie_view(request):
     """쿠키 가져오기"""
-    cookie_value = request.COOKIES.get("my_cookie","쿠키가 없습니다.")
-    return HttpResponse("쿠키값:{cookie_value}")
+    cookie_value = request.COOKIES.get("my_cookie", "쿠키가 없습니다.")
+    return HttpResponse(f"쿠키값:{cookie_value}")
+
 
 def delete_cookie_view(request):
     """쿠키 삭제"""
     response = HttpResponse("쿠키가 삭제 되었습니다.")
     response.delete_cookie("my_cookie")
     return response
+
 
 def set_session_view(request):
     """세션 설정"""
@@ -111,13 +118,13 @@ def get_session_view(request):
     from django.contrib.sessions.backends.db import SessionStore
 
     # 특정 세션 키 조회
-    session_key = "jzr0q2n8h2cuvr8o485z23i5ny7h2g8m"  # 실제 저장된 session_key 입력
+    session_key = "zxqpkve3w73tgqsap48ziv8buzbwxxyn"  # 실제 저장된 session_key 입력
     session = Session.objects.get(session_key=session_key)
 
     # 세션 데이터 복호화
     session_data = SessionStore(session_key=session_key).load()
     print(session_data)  # {'username': 'DjangoUser'}
-    
+
     """세션 가져오기"""
     username = request.session.get("username", "세션이 없습니다")
     return HttpResponse(f"세션값:{username}")

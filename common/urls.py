@@ -7,6 +7,11 @@ from common import views
 app_name = "common"
 
 urlpatterns = [
-    path("login/", auth_view.LoginView.as_view(template_name="common/login.html"), name="login"), # dev_13
-    path("logout/", views.logout_view, name='logout'),
+    path(
+        "login/",
+        auth_view.LoginView.as_view(template_name="common/login.html"),
+        name="login",
+    ),  # dev_13
+    path("logout/", views.logout_view, name="logout"),
+    path("signup/", views.signup, name="signup"), # dev_15
 ]
