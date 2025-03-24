@@ -16,13 +16,17 @@ def signup(request):
     print(request)
 
     if request.method == "POST":
+        # request.POST.get("username")
+        # request.POST.get("password1")
+        # request.POST.get("password2")
         
         form = UserForm(request.POST)
 
         if form.is_valid():
-            form.save()
+            form.save()  # DB 저장
 
-            username = form.cleaned_data.get("username")
+            # 회원가입 하자마자 로그인 됨
+            username = form.cleaned_data.get("username")  # request.POST.get("username", '')
             raw_password = form.cleaned_data.get("password1")
             user = authenticate(username=username, password=raw_password)  # 사용자 인증
             login(request, user)  # 로그인
