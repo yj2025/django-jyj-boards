@@ -1,16 +1,20 @@
 from django.db import models
 from django.contrib.auth.models import User
+
 # Create your models here.
 # dev_2
 
 
 # 하나의 질문에는 무수히 많은 답변이 등록
 class Question(models.Model):
-    # 필드가 null로 저장되는 것을 허용
     author = models.ForeignKey(User, on_delete=models.CASCADE)  # dev_16
     subject = models.CharField(max_length=100)
     content = models.TextField()  # 글자 수에 제한이 없는 텍스트는 TextField를 사용한다
     create_date = models.DateTimeField()
+    # dev_17
+    # modify_date 칼럼에 null을 허용함
+    # blank=True는 form.is_valid()를 통한 입력 데이터 검증 시 값이 없어도 된다는 의미
+    modify_date = models.DateField(null=True, blank=True)  # 수정 일시
 
     def __str__(self):
         return self.subject
@@ -24,6 +28,8 @@ class Answer(models.Model):
     )
     content = models.TextField()
     create_date = models.DateTimeField()
+    # dev_17
+    modify_date = models.DateField(null=True, blank=True)  # 수정 일시
 
 
 # q=Question.objects.get(id=4)

@@ -7,6 +7,8 @@ from pybo.models import Answer, Question
 from django.utils import timezone
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+
 # Create your views here.
 
 
@@ -41,11 +43,12 @@ def detail(request, question_id):
 
 
 # dev_9
-@login_required(login_url='common:login')  # dev_16
+@login_required(login_url="common:login")  # dev_16
 def answer_create(request, question_id):
     """
     pybo 답변등록
     """
+
     question = get_object_or_404(Question, pk=question_id)
 
     if request.method == "POST":
@@ -65,7 +68,8 @@ def answer_create(request, question_id):
     context = {"question": question, "form": form}
     return render(request, "pybo/question_detail.html", context)
 
-@login_required(login_url='common:login')
+
+@login_required(login_url="common:login")  # dev_16
 def question_create(request):
 
     print(request.POST.get("content"))
@@ -88,52 +92,38 @@ def question_create(request):
     return render(request, "pybo/question_form.html", context)
 
 
-def set_cookie_view(request):
-    """쿠키 설정"""
-    response = HttpResponse("쿠키가 설정되었습니다")
-    response.set_cookie("my_cookie", "cookie_value", max_age=3600)  # 1시간 유지
-    return response
+# dev_17
+@login_required(login_url="common:login")
+def question_modify(request, question_id):
+
+    question = get_object_or_404(Question, pk=question_id)
+
+    if request.user != question.author:
+        messages.error(request, "수정 권한이 없습니다.")
+        return redirect("pybo:detail", question_id=question.id)
+
+    if request.method == "POST":
+        form = QuestionForm(request.POST, instance=question)
+
+        if form.is_valid():
+            question = form.save(commit=False)
+            question.mosdify_date = timezone.now()
+            question.save()
+            return redirect("pybo:detail", question_id=question.id)
+    else:
+        form = QuestionForm(instance=question)
+
+    context = {"form": form}
+    return render(request, "pybo/question_form.html", context)
 
 
-def get_cookie_view(request):
-    """쿠키 가져오기"""
-    cookie_value = request.COOKIES.get("my_cookie", "쿠키가 없습니다.")
-    return HttpResponse(f"쿠키값:{cookie_value}")
+@login_required(login_url="common:login")
+def question_delete(request, question_id):
+    question = get_object_or_404(Question, pk=question_id)
 
+    if request.user != question.author:
+        messages.error(request, "삭제권한이 없습니다")
+        return redirect("pybo:detail", question_id=question_id)
 
-def delete_cookie_view(request):
-    """쿠키 삭제"""
-    response = HttpResponse("쿠키가 삭제 되었습니다.")
-    response.delete_cookie("my_cookie")
-    return response
-
-
-def set_session_view(request):
-    """세션 설정"""
-    request.session["username"] = "DjangoUser"  # 세션값 저장.
-    request.session.set_expiry(3600)  # 1시간 후 만료
-    return HttpResponse("세션이 설정되었습니다.")
-
-
-def get_session_view(request):
-
-    from django.contrib.sessions.models import Session
-    from django.contrib.sessions.backends.db import SessionStore
-
-    # 특정 세션 키 조회
-    session_key = "zxqpkve3w73tgqsap48ziv8buzbwxxyn"  # 실제 저장된 session_key 입력
-    session = Session.objects.get(session_key=session_key)
-
-    # 세션 데이터 복호화
-    session_data = SessionStore(session_key=session_key).load()
-    print(session_data)  # {'username': 'DjangoUser'}
-
-    """세션 가져오기"""
-    username = request.session.get("username", "세션이 없습니다")
-    return HttpResponse(f"세션값:{username}")
-
-
-def delete_session_view(request):
-    """세션 삭제"""
-    request.session.flush()  # 모든 세션 데이타 삭제
-    return HttpResponse("세션이 삭제 되었습니다.")
+    question.delete()
+    return redirect("pybo:index")
