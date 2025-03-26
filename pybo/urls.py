@@ -12,9 +12,13 @@ urlpatterns = [
     # http://127.0.0.1:8000/pybo/<int:question_id>/
     path("<int:question_id>/", base_views.detail, name="detail"),  #  dev_3
     path(
-        "answer/create/<int:question_id>/", answer_views.answer_create, name="answer_create"
+        "answer/create/<int:question_id>/",
+        answer_views.answer_create,
+        name="answer_create",
     ),  # dev_5
-    path("question/create/", question_views.question_create, name="question_create"),  # dev_9
+    path(
+        "question/create/", question_views.question_create, name="question_create"
+    ),  # dev_9
     path(
         "question/modify/<int:question_id>/",
         question_views.question_modify,
@@ -35,4 +39,14 @@ urlpatterns = [
         answer_views.answer_delete,
         name="answer_delete",
     ),  # dev_18
+    path(
+        "question/vote/<int:question_id>/",
+        question_views.question_vote,
+        name="question_vote",
+    ),  # dev_19
+    path(
+        "answer/vote/<int:answer_id>/",
+        answer_views.answer_vote,
+        name="answer_vote",
+    ),  # dev_19 답변 추천
 ]

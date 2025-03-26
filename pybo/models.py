@@ -25,22 +25,22 @@ class Question(models.Model):
 
     def __str__(self):
         return self.subject
-    
+
 
 # class    QuestionVoter:
 #     voter =  models.ForeignKey(
 #         User, on_delete=models.CASCADE, related_name="author_question"
-#     ) 
+#     )
 #     question =  models.ForeignKey(
 #         Question , on_delete=models.CASCADE, related_name="author_question"
-#     ) 
-#     modify_date = models.DateField(null=True, blank=True)  
-   
-    
+#     )
+#     modify_date = models.DateField(null=True, blank=True)
 
 
 class Answer(models.Model):
-    author = models.ForeignKey(User, on_delete=models.CASCADE)  # dev_16
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="author_answer"
+    )  # dev_16
     question = models.ForeignKey(
         Question,
         on_delete=models.CASCADE,
@@ -49,6 +49,8 @@ class Answer(models.Model):
     create_date = models.DateTimeField()
     # dev_17
     modify_date = models.DateField(null=True, blank=True)  # 수정 일시
+    # dev_19
+    voter = models.ManyToManyField(User, related_name="voter_answer")
 
 
 # q=Question.objects.get(id=4)
