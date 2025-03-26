@@ -9,6 +9,7 @@ def logout_view(request):
     logout(request)
     return redirect("index")
 
+
 # http://127.0.0.1:8000/common/signup/
 # dev_15
 def signup(request):
@@ -19,14 +20,15 @@ def signup(request):
         # request.POST.get("username")
         # request.POST.get("password1")
         # request.POST.get("password2")
-        
+
         form = UserForm(request.POST)
 
         if form.is_valid():
-            form.save()  # DB 저장
+            
+            form.save() # DB 저장
 
-            # 회원가입 하자마자 로그인 됨
-            username = form.cleaned_data.get("username")  # request.POST.get("username", '')
+            #회원가입 하자 마자,  로그인을 시켜줌
+            username = form.cleaned_data.get("username") #request.POST.get("username",'')
             raw_password = form.cleaned_data.get("password1")
             user = authenticate(username=username, password=raw_password)  # 사용자 인증
             login(request, user)  # 로그인
@@ -34,5 +36,5 @@ def signup(request):
             return redirect("index")
     else:
         form = UserForm()
-    
-    return render(request, "common/signup.html", {'form':form})
+
+    return render(request, "common/signup.html", {"form": form})
