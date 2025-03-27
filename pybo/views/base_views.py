@@ -39,6 +39,7 @@ def index(request):
     # dev_20 수정
     context = {"question_list": page_obj, "page": page, "kw": kw}
 
+    # React와 차이 => 다시 그린다 (클라이언트 입장) => httpResonse 객체로 만든 후에 html 태그를 클라이언트에 보낸다
     return render(request, "pybo/question_list.html", context)
 
 
